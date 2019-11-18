@@ -7,4 +7,4 @@
     - centos7
     > pip install --user pipenv
 
-2. 安装[dlib]()
+2. 安装[detectron2](https://github.com/facebookresearch/detectron2)
