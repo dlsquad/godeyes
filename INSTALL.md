@@ -7,4 +7,6 @@
 - centos7
     > pip install --user pipenv
 
+2. 安装[pytorch](https://github.com/pytorch/pytorch#installation)
+
 2. 安装[detectron2](https://github.com/facebookresearch/detectron2)
