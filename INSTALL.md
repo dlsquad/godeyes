@@ -2,8 +2,9 @@
 ====
 
 1. 安装[pipenv](https://github.com/pypa/pipenv)
-```
-MAC OS: brew install pipenv
-```
+    - mac os: 
+    > brew install pipenv
+    - centos7
+    > pip install --user pipenv
 
 2. 安装[dlib]()
