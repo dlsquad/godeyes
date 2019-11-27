@@ -7,7 +7,7 @@ import asyncio
 import logging.config
 
 from sanic import Sanic
-from sanic import json
+from sanic.response import json
 
 from src.main import main
 
@@ -18,15 +18,15 @@ logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf")
 app = Sanic("myapp")
 
 @app.route("/")
-async def index():
+async def index(request):
     logger = logging.getLogger("sync")
     return json({"hello": "world!"})
 
 
 @app.route("/find")
-async def find():
+async def find(request):
     pass
 
 
 if __name__ == "__main__":
-    app.run(debug=True, access_log=True, host="localhost", port=80)
+    app.run(debug=True, access_log=True, host="localhost", port=8080)
