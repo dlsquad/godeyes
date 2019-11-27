@@ -4,5 +4,6 @@
 
 # editor
 *.swp
-
-
+.idea/*
+.DS_Store
+*test.*
