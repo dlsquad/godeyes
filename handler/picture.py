@@ -1,5 +1,6 @@
+from .base import Base
 
-class Picture():
+class Picture(Base):
 
     def __init__(self):
         pass
