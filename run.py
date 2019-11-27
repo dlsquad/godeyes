@@ -7,7 +7,7 @@ import asyncio
 import logging.config
 
 from sanic import Sanic
-from sanic import json
+from sanic.response import json
 
 from src.main import main
 
@@ -29,4 +29,4 @@ async def find():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, access_log=True, host="localhost", port=80)
+    app.run(debug=True, access_log=True, host="localhost", port=8080)
