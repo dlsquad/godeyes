@@ -3,6 +3,7 @@
 """
 
 import os
+import aiofiles
 import asyncio
 import logging.config
 
@@ -32,8 +33,9 @@ async def index(request):
 
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
-    print(request)
-    print(request.form)
+    for f in list(request.files.values())[0]:
+        async with aiofiles.open(f"./image/picture/{f.name}", "wb") as w:
+            await w.write(f.body)
     return json({"picture_id": 1})
 
 
@@ -42,7 +44,7 @@ async def get_picture(request, picture_id):
     pass
 
 
-@bp.put("/picture/<picture_id>", methods=["PUT"])
+@app.route("/picture/<picture_id>", methods=["PUT"])
 async def put_picture(request, picture_id):
     pass
 

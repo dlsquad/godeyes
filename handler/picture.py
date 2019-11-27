@@ -1,3 +1,5 @@
+import aiofiles
+
 from .base import Base
 
 class Picture(Base):
@@ -5,12 +7,16 @@ class Picture(Base):
     def __init__(self):
         pass
 
-    def get(self):
+    async def post_picture(self, request):
+        pass
+        
+    async def get_picture(self, request, picture_id):
         pass
 
-    def post(self):
+    async def put_picture(self, request, picture_id):
         pass
 
-    def put(self):
+    async def insert(self, ):
+        sql = "INSERT INTO picture()"
         pass
 
