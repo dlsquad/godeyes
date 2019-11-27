@@ -9,8 +9,6 @@ import logging.config
 from sanic import Sanic
 from sanic.response import json, stream
 
-from src.main import main
-
 CURRENT_WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf"))
 
