@@ -7,7 +7,7 @@ import asyncio
 import logging.config
 
 from sanic import Sanic
-from sanic.response import json
+from sanic.response import json, stream
 
 from src.main import main
 
