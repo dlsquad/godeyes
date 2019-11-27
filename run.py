@@ -18,13 +18,13 @@ logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf")
 app = Sanic("myapp")
 
 @app.route("/")
-async def index():
+async def index(request):
     logger = logging.getLogger("sync")
     return json({"hello": "world!"})
 
 
 @app.route("/find")
-async def find():
+async def find(request):
     pass
 
 
