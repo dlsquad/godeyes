@@ -19,11 +19,10 @@ logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf")
 
 
 app = Sanic("faceplus")
-bp = Blueprint("mybp")
 logger = logging.getLogger("web")
 
 
-@bp.get("/")
+@app.route("/", methods=["GET"])
 async def index(request):
     file_path = "./data/classmate.jpeg"
     file_stat = await async_os.stat(file_path)
@@ -31,21 +30,23 @@ async def index(request):
     return await file_stream(file_path, headers=headers, chunked=False)
 
 
-@bp.post("/picture", stream=True)
+@app.route("/picture", methods=["POST"])
 async def post_picture(request):
     print(request)
     print(request.form)
     return json({"picture_id": 1})
 
 
-@bp.get("/picture/<picture_id>")
+@app.route("/picture/<picture_id>", methods=["GET"])
 async def get_picture(request, picture_id):
     pass
 
 
-@bp.put("/picture/<picture_id>")
+@bp.put("/picture/<picture_id>", methods=["PUT"])
 async def put_picture(request, picture_id):
     pass
+
+
 
 
 if __name__ == "__main__":
