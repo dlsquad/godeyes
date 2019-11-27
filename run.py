@@ -7,7 +7,7 @@ import asyncio
 import logging.config
 
 from sanic import Sanic
-from aiofiles import async_os
+from aiofiles import os as async_os
 from sanic.response import json, file_stream
 
 CURRENT_WORK_DIR = os.path.dirname(os.path.abspath(__file__))
