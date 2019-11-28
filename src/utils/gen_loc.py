@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 
@@ -6,86 +7,107 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-columns=['x1','y1','x2','y2','score']
-testfile="/home/fbs/fbs/workspace/PycharmProjects/face_detection/mxnet_mtcnn_face_detection/boxes_data_test.csv"
-N = 5
+testfile = "/home/fbs/fbs/workspace/PycharmProjects/face_detection/mxnet_mtcnn_face_detection/boxes_data_test.csv"
 
-def detect_outliers(df,n,features):
-    """
-    Tuckey算法
-    """
-    outlier_indices = []
 
-    # iterate over features(columns)
-    for col in features:
-        # 1st quartile (25%)
-        Q1 = np.percentile(df[col], 25)
-        # 3rd quartile (75%)
-        Q3 = np.percentile(df[col],75)
-        # Interquartile range (IQR)
-        IQR = Q3 - Q1
+class BBoxesTool:
+    _columns = ['x1', 'y1', 'x2', 'y2', 'score']
+    _MaxPeoplePerTask = 30
 
-        # outlier step
-        outlier_step = 1.5 * IQR
-        # Determine a list of indices of outliers for feature col
-        outlier_list_col = df[(df[col] < Q1 - outlier_step) | (df[col] > Q3 + outlier_step )].index
+    def __init__(self, boxes):
+        self.boxes = pd.DataFrame(boxes, columns=self._columns)
 
-        # append the found outlier indices for col to the list of outlier indices
-        outlier_indices.extend(outlier_list_col)
+    def detect_outliers(df, n, features):
+        """
+        Tuckey算法
+        """
+        outlier_indices = []
 
-    # select observations containing more than 2 outliers
-    outlier_indices = Counter(outlier_indices)
-    multiple_outliers = list( k for k, v in outlier_indices.items() if v > n )
-    return multiple_outliers
+        # iterate over features(columns)
+        for col in features:
+            # 1st quartile (25%)
+            Q1 = np.percentile(df[col], 25)
+            # 3rd quartile (75%)
+            Q3 = np.percentile(df[col], 75)
+            # Interquartile range (IQR)
+            IQR = Q3 - Q1
 
-def filter_outlier(bboxes):
-    pdBoxes = pd.DataFrame(bboxes, columns=columns)
-    pdBoxes['area'] = list(map(lambda x1,y1,x2,y2: (y2-y1)*(x2-x1), pdBoxes['x1'],pdBoxes['y1'],pdBoxes['x2'], pdBoxes['y2']))
-    # print(pdBoxes.describe())
-    # plt.hist(pdBoxes['area'])
-    # plt.show()
-    # pdBoxes.to_csv(testfile,columns=['x1','y1','x2','y2','score'],index=False)
-    outliers = detect_outliers(pdBoxes,0,['y1','area'])
-    listPridictLow = list(pdBoxes.loc[pdBoxes['score'] < np.percentile(pdBoxes['score'], 15)].index)
-    outliers = [val for val in outliers if val in listPridictLow]
-    print(outliers)
-    pdBoxes = pdBoxes.drop(outliers).drop(columns=['area'],axis=1)
-    # pdBoxes = pdBoxes.take(outliers)
-    return pdBoxes.values
+            # outlier step
+            outlier_step = 1.5 * IQR
+            # Determine a list of indices of outliers for feature col
+            outlier_list_col = df[(df[col] < Q1 - outlier_step) | (df[col] > Q3 + outlier_step)].index
 
-def box_to_location(bboxes):
-    """
-        gen location from boxes location
-    Parameters:
-    ----------
-        bboxes: numpy array, n x 5 (x1,y2,x2,y2,score)
-    Retures:
-    -------
-        peaple location: DataFrame (index: raw, col, bbox_index)
-    """
-    hdf = pd.DataFrame(bboxes,columns=columns).sort_values(by=['x1'])
-    print(hdf)
-    peopleNum = len(hdf)
-    minX = hdf['x1'].min()
-    minY = hdf['y1'].min()
-    maxX = hdf['x2'].max()
-    maxY = hdf['y2'].max()
-    step = 1
-    stepWidth = 0
-    if (peopleNum / N > 10 ):
-        step = peopleNum / N
-        stepWidth = (maxX - minX) / N
-    return hdf
+            # append the found outlier indices for col to the list of outlier indices
+            outlier_indices.extend(outlier_list_col)
 
-def GenLocOfTest():
-    boxes = pd.read_csv(testfile,header=0)
+        # select observations containing more than 2 outliers
+        outlier_indices = Counter(outlier_indices)
+        multiple_outliers = list(k for k, v in outlier_indices.items() if v > n)
+        return multiple_outliers
+
+    def filter_outlier(self):
+        self.boxes['area'] = list(map(lambda x1, y1, x2, y2: (y2 - y1) * (x2 - x1),
+                                      self.boxes['x1'], self.boxes['y1'], self.boxes['x2'], self.boxes['y2']))
+        outliers = BBoxesTool.detect_outliers(self.boxes, 0, ['y1', 'area'])
+        list_pridict_low = list(self.boxes.loc[self.boxes['score'] < np.percentile(self.boxes['score'], 15)].index)
+        outliers = [val for val in outliers if val in list_pridict_low]
+        print(outliers)
+        self.boxes = self.boxes.drop(outliers).drop(columns=['area'], axis=1)
+        return
+
+    def gen_loc_parts(boxes):
+        # boxes is sorted by x1
+        print(boxes)
+        locs=[]
+        for i in boxes:
+            boxes
+        return
+
+    def box_to_location(self):
+        """
+            gen location from boxes location
+        Parameters:
+        ----------
+            bboxes: numpy array, n x 5 (x1,y2,x2,y2,score)
+        Retures:
+        -------
+            peaple location: DataFrame (index: raw, col, bbox_index)
+        """
+        sorted_boxes = pd.DataFrame(self.boxes, columns=self._columns).sort_values(by=['x1'])
+        print(sorted_boxes)
+        people_num = len(sorted_boxes)
+        # minX = sorted_boxes['x1'].min()
+        # minY = pdBoxes['y1'].min()
+        # maxX = sorted_boxes['x2'].max()
+        # maxY = pdBoxes['y2'].max()
+        task_num = 1
+        # stepWidth = 0
+        if people_num / self._MaxPeoplePerTask > 2:
+            task_num = math.ceil(float(people_num) / float(self._MaxPeoplePerTask))
+            # stepWidth = math.ceil(float(maxX - minX) / float(task_num))
+        # split tasks
+        tasks = []
+        for i in range(task_num):
+            begin = i * self._MaxPeoplePerTask
+            end = (i + 1) * self._MaxPeoplePerTask
+            if end > people_num:
+                end = people_num
+            # print(begin , end)
+            tasks.append(BBoxesTool.gen_loc_parts(sorted_boxes[begin:end]))
+        print(tasks)
+        return tasks
+
+
+def gen_loc_of_test():
+    boxes = pd.read_csv(testfile, header=0)
     # print(boxes.describe())
-    print(box_to_location(filter_outlier(boxes)))
-    return
+    btools = BBoxesTool(boxes)
+    btools.filter_outlier()
+    return btools.box_to_location()
 
 
-pd.set_option('display.max_rows',None)
+pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
-pd.set_option('display.max_colwidth',500)
+pd.set_option('display.max_colwidth', 500)
+gen_loc_of_test()
 
-GenLocOfTest()
