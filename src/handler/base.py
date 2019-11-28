@@ -16,19 +16,12 @@ class Base:
         return cls.instance
 
     async def __aenter__(self):
-        logging.info(f"{cls.__name__} ")
+        logging.info(f"{cls.__name__} acquire connect.")
         if self.pool is None:
             self.pool = await aiomysql.create_pool(
                 host='127.0.0.1', port=3306, user='root', 
                 password='DLsquad5@fudan',db='faceplus')
             logging.info(f"{cls.__name__} create connect.")
-
-        # async with pool.acquire() as conn:
-        #     async with conn.cursor() as cur:
-        #         await cur.execute("SELECT 42;")
-        #         print(cur.description)
-        #         (r,) = await cur.fetchone()
-        #         assert r == 42
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         print(f"{cls.__name__} release connect.")

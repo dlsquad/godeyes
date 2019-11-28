@@ -14,14 +14,15 @@ from aiofiles import os as async_os
 from sanic.blueprints import Blueprint
 from sanic.response import json, file_stream
 
-# from handler.user import User
-# from handler.picture import Picture
+from src.handler.user import user
+from src.handler.picture import picture
 
 CURRENT_WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf"))
 
 
 app = Sanic("faceplus")
+app.static('/static', './static')
 logger = logging.getLogger("web")
 
 
@@ -35,7 +36,6 @@ async def index(request):
 
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
-    print("have request")
     data = request.json.get("pic", None)
     if not data:
         return json({
@@ -45,19 +45,12 @@ async def post_picture(request):
                 "code": ""
             }
         })
-    # result = picture.post_picture(data)
-    image_str, image_data = data.split(",", 1)
-    print(image_str)
-    image_format = image_str.split(";")[0].split("/")[-1]
-    print(image_format)
-    image = base64.decodestring(image_data.strip().encode())
-    async with aiofiles.open(f"./image/picture/chenenquan.{image_format}", "wb") as w:
-        await w.write(image)
+    code = await picture.post_picture(data)
     return json({
             "isSuccess": "true",
             "msg": "",
             "data": {
-                "code": '123456'
+                "code": code
             }
     })
 

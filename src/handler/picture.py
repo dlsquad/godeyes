@@ -9,37 +9,37 @@ from utils import gen_code
 
 class Picture(Base):
 
-    def __init__(self):
-        pass
+    static_path = "./static/picture"
 
     async def post_picture(self, data: str):
-        image = base64.decodestring(data.encode())
+        image_str, image_data = data.split(",", 1)
+        image_suf = image_str.split(";")[0].split("/")[-1]
+        image_bytes = base64.decodestring(image_data.strip().encode())
+        code, fname = await self.insert_picture(image_suf)
 
-        await self.insert_picture()
-
-        async with aiofiles.open("./image/picture/chenenquan.jpg", "wb") as w:
+        path = f"{self.static_path}/{fname}"
+        async with aiofiles.open(path, "wb") as w:
             await w.write(image)
-        
-    async def get_picture(self, request, picture_id):
-        pass
+        return code
 
-    async def put_picture(self, request, picture_id):
-        pass
-
-    async def insert_picture(self):
-        sql = "INSERT INTO picture(code,) values({code}); "
+    async def insert_picture(self, suf: str):
+        sql = "INSERT INTO picture(code, fname) values({code}, {fname});"
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 while 1:
                     code = gen_code()
+                    fname = code+"."+suf
                     try:
-                        await cur.execute(sql.format(code))
+                        await cur.execute(sql.format(
+                            code=code,
+                            fname=fname
+                        ))
+                        await conn.commit()
                     except IntegrityError:
-                        logger.info(f"{code} is already exists.")
+                        logger.warn(f"{code} is already exists.")
                         continue
-                    break
-                cur.
-
+                    logger.info(f"{code} have inserted.")
+                    return code, fname
 
 
 picture = Picture()
