@@ -21,8 +21,8 @@ w, h = img.shape[0:2]
 results = detector.detect_face(img)
 if results is not None:
     bboxes = BBoxesTool(results[0])
-    bboxes.filter_outlier()
-    total_boxes=bboxes.boxes.values
+    # total_boxes = bboxes.get_test_boxes()
+    total_boxes=bboxes.get_boxes()
     points = results[1]
 
     # print(total_boxes)
