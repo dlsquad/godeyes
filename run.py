@@ -35,6 +35,7 @@ async def index(request):
 
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
+    print("have request")
     data = request.json.get("pic", None)
     if not data:
         return json({
@@ -46,7 +47,9 @@ async def post_picture(request):
         })
     # result = picture.post_picture(data)
     image_str, image_data = data.split(",", 1)
+    print(image_str)
     image_format = image_str.split(";")[0].split("/")[-1]
+    print(image_format)
     image = base64.decodestring(image_data.strip().encode())
     async with aiofiles.open(f"./image/picture/chenenquan.{image_format}", "wb") as w:
         await w.write(image)
