@@ -11,7 +11,6 @@ import logging.config
 
 from sanic import Sanic
 from aiofiles import os as async_os
-from sanic.blueprints import Blueprint
 from sanic.response import json, file_stream
 
 from src.handler.user import user

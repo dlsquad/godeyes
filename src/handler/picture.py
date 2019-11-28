@@ -1,11 +1,14 @@
+import base64
+import logging
 import asyncio
 import aiofiles
-
-from hashlab import md5
 from pymysql.err import IntegrityError
 
 from .base import Base
-from utils import gen_code
+from src.utils import gen_code
+
+logger = logging.getLogger("web")
+
 
 class Picture(Base):
 
@@ -19,11 +22,11 @@ class Picture(Base):
 
         path = f"{self.static_path}/{fname}"
         async with aiofiles.open(path, "wb") as w:
-            await w.write(image)
+            await w.write(image_bytes)
         return code
 
     async def insert_picture(self, suf: str):
-        sql = "INSERT INTO picture(code, fname) values({code}, {fname});"
+        sql = "INSERT INTO picture(code, fname) values('{code}', '{fname}');"
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 while 1:
