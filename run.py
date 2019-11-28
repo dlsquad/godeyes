@@ -3,8 +3,10 @@
 """
 
 import os
+import base64
 import aiofiles
 import asyncio
+import logging
 import logging.config
 
 from sanic import Sanic
@@ -33,10 +35,26 @@ async def index(request):
 
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
-    for f in list(request.files.values())[0]:
-        async with aiofiles.open(f"./image/picture/{f.name}", "wb") as w:
-            await w.write(f.body)
-    return json({"picture_id": 1})
+    data = request.form.get("pic", None)
+    if not data:
+        return json({
+            "isSuccess": "false",
+            "msg": "paramter pic is not find",
+            "data": {
+                "code": ""
+            }
+        })
+    result = picture.post_picture(data)
+    # image = base64.decodestring(data.encode())
+    # async with aiofiles.open("./image/picture/chenenquan.jpg", "wb") as w:
+    #     await w.write(image)
+    return json({
+            "isSuccess": "false",
+            "msg": "",
+            "data": {
+                "code": result
+            }
+    })
 
 
 @app.route("/picture/<picture_id>", methods=["GET"])
@@ -47,8 +65,6 @@ async def get_picture(request, picture_id):
 @app.route("/picture/<picture_id>", methods=["PUT"])
 async def put_picture(request, picture_id):
     pass
-
-
 
 
 if __name__ == "__main__":
