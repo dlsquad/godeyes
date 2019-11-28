@@ -35,7 +35,7 @@ async def index(request):
 
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
-    data = request.form.get("pic", None)
+    data = request.json.get("pic", None)
     if not data:
         return json({
             "isSuccess": "false",
@@ -45,8 +45,10 @@ async def post_picture(request):
             }
         })
     # result = picture.post_picture(data)
-    image = base64.decodestring(data.encode())
-    async with aiofiles.open("./image/picture/chenenquan.jpg", "wb") as w:
+    image_str, image_data = data.split(",", 1)
+    image_format = image_str.split(";")[0].split("/")[-1]
+    image = base64.decodestring(image_data.strip().encode())
+    async with aiofiles.open(f"./image/picture/chenenquan.{image_format}", "wb") as w:
         await w.write(image)
     return json({
             "isSuccess": "true",
