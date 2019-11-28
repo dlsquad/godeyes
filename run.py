@@ -14,8 +14,8 @@ from aiofiles import os as async_os
 from sanic.blueprints import Blueprint
 from sanic.response import json, file_stream
 
-from handler.user import User
-from handler.picture import Picture
+# from handler.user import User
+# from handler.picture import Picture
 
 CURRENT_WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf"))
@@ -44,15 +44,15 @@ async def post_picture(request):
                 "code": ""
             }
         })
-    result = picture.post_picture(data)
-    # image = base64.decodestring(data.encode())
-    # async with aiofiles.open("./image/picture/chenenquan.jpg", "wb") as w:
-    #     await w.write(image)
+    # result = picture.post_picture(data)
+    image = base64.decodestring(data.encode())
+    async with aiofiles.open("./image/picture/chenenquan.jpg", "wb") as w:
+        await w.write(image)
     return json({
-            "isSuccess": "false",
+            "isSuccess": "true",
             "msg": "",
             "data": {
-                "code": result
+                "code": '123456'
             }
     })
 
