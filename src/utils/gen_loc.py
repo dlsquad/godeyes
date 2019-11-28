@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-testfile = "/home/fbs/fbs/workspace/PycharmProjects/face_detection/mxnet_mtcnn_face_detection/boxes_data_test.csv"
+testfile = "/Users/fanbeishuang/fbs/workspace/py/PycharmProjects/godeyes/boxes_data_test.csv"
 
 
 class BBoxesTool:
@@ -51,7 +51,7 @@ class BBoxesTool:
         outliers = BBoxesTool.detect_outliers(self.boxes, 0, ['y1', 'area'])
         list_pridict_low = list(self.boxes.loc[self.boxes['score'] < np.percentile(self.boxes['score'], 15)].index)
         outliers = [val for val in outliers if val in list_pridict_low]
-        print(outliers)
+        # print(outliers)
         self.boxes = self.boxes.drop(outliers).drop(columns=['area'], axis=1)
         return
 
