@@ -52,6 +52,7 @@ async def post_picture(request):
                 "code": code
             }
     })
+
 @app.route("/picture/<code>", methods=["GET"])
 async def get_picture(request, code):
     # TODO 根据密码获取照片，返回url
