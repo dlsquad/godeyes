@@ -7,11 +7,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-testfile = "/Users/fanbeishuang/fbs/workspace/py/PycharmProjects/godeyes/boxes_data_test.csv"
+# testfile = "/Users/fanbeishuang/fbs/workspace/py/PycharmProjects/godeyes/boxes_data_test.csv"
+testfile = "/home/fbs/fbs/workspace/PycharmProjects/face_detection/mxnet_mtcnn_face_detection/boxes_data_test.csv"
 
 
 class BBoxesTool:
     _columns = ['x1', 'y1', 'x2', 'y2', 'score']
+    _columns_rc = ['raw', 'col']
     _MaxPeoplePerTask = 120
 
     def __init__(self, boxes):
@@ -20,10 +22,10 @@ class BBoxesTool:
         self._to_location()
 
     def get_boxes(self):
-        return self.boxes.values
+        return self.boxes[self._columns].values
 
-    def get_boxes_loc(self):
-        return
+    def get_boxi_loc(self, index):
+        return [self.boxes.loc[index].at['raw'], self.boxes.loc[index].at['col']]
 
     def detect_outliers(df, n, features):
         """
@@ -54,6 +56,8 @@ class BBoxesTool:
         return multiple_outliers
 
     def _filter_outlier(self):
+        # self.boxes.to_csv(testfile,columns=['x1','y1','x2','y2','score'],index=False)
+
         self.boxes['area'] = list(map(lambda x1, y1, x2, y2: (y2 - y1) * (x2 - x1),
                                       self.boxes['x1'], self.boxes['y1'], self.boxes['x2'], self.boxes['y2']))
         outliers = BBoxesTool.detect_outliers(self.boxes, 0, ['y1', 'area'])
@@ -64,42 +68,59 @@ class BBoxesTool:
         return
 
     def _gen_loc_parts(self, boxes):
-        # boxes is sorted by x1
-        # print(boxes.describe())
-        sorted_y1 = boxes.sort_values(by=['y1'])
-        print("=========sorted y1=============")
+        sorted_y1 = boxes.sort_values(by=['y1'], ascending=False)
         # print(sorted_y1)
         raw_loc = {}  # raw_count[boxes_index]
         raw_count = 1
         for index, box in sorted_y1.iterrows():
-            self.test_boxes = [index]
-            return
-            print("index:", index)
             if raw_count not in raw_loc:
                 raw_loc[raw_count] = [index]
                 continue
-            cur_raw = raw_loc[raw_count]
 
             left_x = box.at['x1']
-            w = (box.at['x2'] - left_x)
+            w = (box.at['x2'] - left_x)/2
             left_x -= w
             right_x = left_x + 2 * w
 
             new_raw = False
-            for rd_index in cur_raw:
+            for rd_index in raw_loc[raw_count]:
                 rd_box = boxes.loc[rd_index]
                 x1 = rd_box.at['x1']
                 x2 = rd_box.at['x2']
-                if ((left_x > x1 and left_x < x2 ) or (right_x > x1 and right_x < x2)):
-                    print("add raw")
+                # print("rd_index:", rd_index, ",x1:", x1, ",x2:", x2, ",left_x:", left_x, ",right_x:", right_x)
+                if (x1 <= left_x <= x2) or (left_x <= x1 and right_x >= x2) or (x1 <= right_x <= x2):
                     new_raw = True
+                    # if raw_count == 4:
+                    #     self.test_boxes = raw_loc[raw_count]
+                    #     return raw_loc
                     raw_count += 1
                     raw_loc[raw_count] = [index]
                     break
-            if (not new_raw):
+            if not new_raw:
                 raw_loc[raw_count].append(index)
-            print ("raw_loc", raw_loc)
+
+        self.test_boxes = raw_loc[raw_count]
         return raw_loc
+
+    def _raw_loc_to_box_info(self, raw_loc):
+        # resorted boxes
+        raw_col_info = []
+        for raw, indexes in raw_loc.items():
+            col_count = 0
+            raw_boxes = self.boxes.take(indexes).sort_values(by=['x1'])
+            for index, box in raw_boxes.iterrows():
+                col_count += 1
+                raw_col_info.append([index, raw, col_count])
+                # print(raw_col_info)
+
+        raw_col_pd = pd.DataFrame(raw_col_info, columns=['ind','raw', 'col']).sort_values(by='ind') #.drop('index', axis=1)
+        # raw_col_pd = raw_col_pd.drop(columns=['ind'], axis=1)
+        self.boxes['raw'] = list(raw_col_pd['raw'])
+        self.boxes['col'] = list(raw_col_pd['col'])
+        return
+
+    def get_boxes_info(self):
+        return self.boxes.groupby('raw')['col'].count()
 
     def _to_location(self):
         """
@@ -114,15 +135,10 @@ class BBoxesTool:
         sorted_boxes = pd.DataFrame(self.boxes, columns=self._columns).sort_values(by=['x1'])
         # print(sorted_boxes)
         people_num = len(sorted_boxes)
-        # minX = sorted_boxes['x1'].min()
-        # minY = pdBoxes['y1'].min()
-        # maxX = sorted_boxes['x2'].max()
-        # maxY = pdBoxes['y2'].max()
         task_num = 1
         # stepWidth = 0
         if people_num / self._MaxPeoplePerTask > 2:
             task_num = math.ceil(float(people_num) / float(self._MaxPeoplePerTask))
-            # stepWidth = math.ceil(float(maxX - minX) / float(task_num))
         # split tasks
         tasks = []
         for i in range(task_num):
@@ -134,7 +150,17 @@ class BBoxesTool:
             # return
             tasks.append(self._gen_loc_parts(sorted_boxes[begin:end]))
         # print(tasks)
-        return tasks
+        return self._raw_loc_to_box_info(self._merge_gen_loc_tasks(tasks))
+
+    def _merge_gen_loc_tasks(self, tasks):
+        res = {}
+        for loc_map in tasks:
+            for raw, indexes in loc_map.items():
+                if raw not in res:
+                    res[raw] = indexes
+                    continue
+                res[raw].extend(indexes)
+        return res
 
     def get_test_boxes(self):
         # indexes = []
@@ -142,17 +168,19 @@ class BBoxesTool:
         #     indexes.append(index)
         return self.boxes.take(self.test_boxes).values
 
+
 def gen_loc_of_test():
     boxes = pd.read_csv(testfile, header=0)
     # print(boxes.describe())
     btools = BBoxesTool(boxes)
     print("test boxes")
     # print(btools.get_boxes())
-    print(btools.get_test_boxes())
+    print(btools.get_boxes_info())
+    print(btools.get_boxi_loc(6))
+    print(btools.get_boxi_loc(66))
 
 
-#pd.set_option('display.max_rows', None)
-#pd.set_option('display.max_columns', None)
+# pd.set_option('display.max_rows', None)
+# pd.set_option('display.max_columns', None)
 # pd.set_option('display.max_colwidth', 500)
 gen_loc_of_test()
-
