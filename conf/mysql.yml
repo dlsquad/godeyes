@@ -1,0 +1,28 @@
+version: '3.3'
+
+services:
+  db:
+     image: mysql:5.7
+     volumes:
+       - db_data:/var/lib/mysql
+     restart: always
+     ports:
+       - "3306:3306"
+     environment:
+       MYSQL_ROOT_PASSWORD: DLsquad5@fudan
+       MYSQL_DATABASE: faceplus
+       MYSQL_USER: dlsquad
+       MYSQL_PASSWORD: DLsquad5@fudan
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - db:mysql
+    ports:
+      - 8181:80
+    environment:
+      MYSQL_USERNAME: dlsquad
+      MYSQL_ROOT_PASSWORD: DLsquad5@fudan
+
+volumes:
+    db_data:
