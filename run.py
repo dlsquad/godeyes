@@ -13,12 +13,16 @@ from sanic import Sanic
 from aiofiles import os as async_os
 from sanic.response import json, file_stream
 
+from src.utils import
 from src.handler.user import user
 from src.handler.picture import picture
 
 CURRENT_WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf"))
 
+PORT = 8080
+HOST = "localhost"
+URL = "http://localhost:8080"
 
 app = Sanic("faceplus")
 app.static('/static', './static')
@@ -56,7 +60,7 @@ async def post_picture(request):
     })
 
 @app.route("/code/check", methods=["GET", "POST"])
-async def check_code(request, code):
+async def check_code(request):
     """检验集体照查看码"""
     msg = ""
     isSuccess = "true"
@@ -72,14 +76,31 @@ async def check_code(request, code):
 @app.route("/user/find", methods=["POST"])
 async def find_user_in_picture(request):
     """上传自拍，并在合照中识别自己"""
+    pic = request.json.get("pic", None)
+    name = request.json.get("name", None)
+    code = request.json.get("code", None)
+    if not (pic and name and code):
+        return json({
+                "isSuccess": "false",
+                "msg": "parameter is not correct.",
+                "data": {}
+        })
+
+    pic = pic.strip()
+    name = name.strip()
+    code = code.strip()
+    await user.post_user(name, pic)
+    fname, pos = await user.find_user(name, code)
+    url = f"{URL}/static/user/fname"
     return json({
-            "isSuccess": "true",
-            "msg": "",
-            "data": {
-                "url": "xxxx.com/xx.png"
-            }
+        "isSuccess": true,
+        "msg": null,
+        "data": {
+            "url": url,
+            "position": pos
+        }
     })
 
 
 if __name__ == "__main__":
-    app.run(debug=True, access_log=True, host="localhost", port=8080)
+    app.run(debug=True, access_log=True, host=HOST, port=PORT)
