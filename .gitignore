@@ -7,3 +7,6 @@
 .idea/*
 .DS_Store
 *test.*
+
+# log
+*.log

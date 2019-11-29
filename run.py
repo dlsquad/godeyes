@@ -32,7 +32,7 @@ async def index(request):
     headers = {"Content-Length": str(file_stat.st_size)}
     return await file_stream(file_path, headers=headers, chunked=False)
 
-
+# 创建团体照
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
     data = request.json.get("pic", None)
