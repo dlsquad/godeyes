@@ -32,7 +32,7 @@ async def index(request):
     headers = {"Content-Length": str(file_stat.st_size)}
     return await file_stream(file_path, headers=headers, chunked=False)
 
-# 创建团体照
+
 @app.route("/picture", methods=["POST"])
 async def post_picture(request):
     data = request.json.get("pic", None)
@@ -52,12 +52,23 @@ async def post_picture(request):
                 "code": code
             }
     })
-
-
-@app.route("/picture/<picture_id>", methods=["GET"])
-async def get_picture(request, picture_id):
-    pass
-
+@app.route("/picture/<code>", methods=["GET"])
+async def get_picture(request, code):
+    # TODO 根据密码获取照片，返回url
+    return json({
+            "isSuccess": "true",
+            "msg": "",
+            "data": {
+                "url": "xxxx.com/xx.png"
+            }
+    })
+@app.route("/picture/check_code/<code>", methods=["GET"])
+async def check_code(request, code):
+    # TODO 校验密码，正确返回、错误返回
+    return json({
+            "isSuccess": "true",
+            "msg": "",
+    })
 
 @app.route("/picture/<picture_id>", methods=["PUT"])
 async def put_picture(request, picture_id):
