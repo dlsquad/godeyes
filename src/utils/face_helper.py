@@ -110,6 +110,7 @@ def get_face_locations(img_name):
         arr_img = face_recognition.load_image_file(img_name)
         # 人脸位置
         ori_face_locations = face_recognition.face_locations(arr_img)
+        ori_face_locations = [(left, top, right, bottom, 0) for top, right, bottom, left in ori_face_locations]
         write_dict_2_model(ori_face_locations, model_name)
     else:
         ori_face_locations = read_dict_model(model_name)
@@ -137,11 +138,11 @@ if __name__ == '__main__':
 
     group_photo_name = "mse.jpg"
 
-    simFaceTopN = get_sim_face("../../static/picture/liaoLaoshi.jpg", get_face_encoding(group_photo_name))  # 寻找相似脸
+    simFaceTopN = get_sim_face("../../static/picture/wangLei.jpg", get_face_encoding(group_photo_name))  # 寻找相似脸
 
     arr_img = face_recognition.load_image_file(group_photo_name)
     for i in simFaceTopN:
-        top, right, bottom, left = get_face_locations(group_photo_name)[i]
-        draw2 = cv2.rectangle(arr_img, (left, top), (right, bottom), (255, 255, 0), 2)
+        x1, y1, x2, y2, _ = get_face_locations(group_photo_name)[i]
+        draw2 = cv2.rectangle(arr_img, (x1, y1), (x2, y2), (255, 255, 0), 2)
         draw2 = draw2[..., ::-1]
         drow_cv2_img(draw2)
