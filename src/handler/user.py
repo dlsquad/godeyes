@@ -4,7 +4,7 @@ class User(Base):
 
     static_path = "./static/picture"
 
-    async def insert_user(self, name: str, fname: str):
+    async def _insert_user(self, name: str, fname: str):
         sql = f"""INSERT INTO user(name, fname) SELECT '{name}', '{fname}'
         FROM DUAL WHERE NOT EXISTS (SELECT id FROM user WHERE name='{name}')"""
         async with self, self.pool.acquire() as conn:
@@ -18,7 +18,7 @@ class User(Base):
         image_bytes = base64.decodestring(image_data.strip().encode())
 
         fname = ".".join([name, image_suf])
-        await self.insert_user(name, fname)
+        await self._insert_user(name, fname)
         path = f"{self.static_path}/{fname}"
         async with aiofiles.open(path, "wb") as w:
             await w.write(image_bytes)
@@ -43,7 +43,7 @@ class User(Base):
                 await cur.execute(sql)
                 ret = await cur.fetchone()
 
-        if ret:
+        if not ret:
             return ret[2], (ret[0], ret[1])
 
 
