@@ -103,7 +103,7 @@ def get_face_locations(img_name):
     """
     若该图片人脸位置已经存在，则直接返回。否则重新计算
     :param img_name: 图片名字
-    :return: 人脸位置 List((top, right, bottom, left))
+    :return: 人脸位置 List((x1, y1, x2, y2, _))
     """
     model_name = '{}_face_locations.model'.format(img_name.split('.')[0])
     if not os.path.exists(model_name):
