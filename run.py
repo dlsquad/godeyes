@@ -24,17 +24,19 @@ app = Sanic("faceplus")
 app.static('/static', './static')
 logger = logging.getLogger("web")
 
-
 @app.route("/", methods=["GET"])
 async def index(request):
-    file_path = "./data/classmate.jpeg"
-    file_stat = await async_os.stat(file_path)
-    headers = {"Content-Length": str(file_stat.st_size)}
-    return await file_stream(file_path, headers=headers, chunked=False)
+    return json({
+        "isSuccess": "true",
+        "msg": "welcome to faceplus system!",
+        "data": {
+            "url": "xxxx.com/xx.png"
+        }
+    })
 
-
-@app.route("/picture", methods=["POST"])
+@app.route("/picture/post", methods=["POST"])
 async def post_picture(request):
+    """上传集体照,并返回集体照的查看码。"""
     data = request.json.get("pic", None)
     if not data:
         return json({
@@ -53,9 +55,23 @@ async def post_picture(request):
             }
     })
 
-@app.route("/picture/<code>", methods=["GET"])
-async def get_picture(request, code):
-    # TODO 根据密码获取照片，返回url
+@app.route("/code/check", methods=["GET", "POST"])
+async def check_code(request, code):
+    """检验集体照查看码"""
+    msg = ""
+    isSuccess = "true"
+    code = request.json.get("code", None)
+    if not await picture.check_code(code):
+        isSuccess = "false"
+        msg = "code is not exists."
+    return json({
+            "msg": msg,
+            "isSuccess": isSuccess,
+    })
+
+@app.route("/user/find", methods=["POST"])
+async def find_user_in_picture(request):
+    """上传自拍，并在合照中识别自己"""
     return json({
             "isSuccess": "true",
             "msg": "",
@@ -63,17 +79,6 @@ async def get_picture(request, code):
                 "url": "xxxx.com/xx.png"
             }
     })
-@app.route("/picture/check_code/<code>", methods=["GET"])
-async def check_code(request, code):
-    # TODO 校验密码，正确返回、错误返回
-    return json({
-            "isSuccess": "true",
-            "msg": "",
-    })
-
-@app.route("/picture/<picture_id>", methods=["PUT"])
-async def put_picture(request, picture_id):
-    pass
 
 
 if __name__ == "__main__":

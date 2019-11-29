@@ -14,6 +14,13 @@ class Picture(Base):
 
     static_path = "./static/picture"
 
+    async def check_code(self, code: str):
+        sql = f"SELECT code FROM picture WHERE code={code}"
+        async with self, self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql)
+                return bool(await cur.fetchone())
+
     async def post_picture(self, data: str):
         image_str, image_data = data.split(",", 1)
         image_suf = image_str.split(";")[0].split("/")[-1]
