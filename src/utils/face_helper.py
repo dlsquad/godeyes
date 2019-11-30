@@ -135,9 +135,7 @@ def get_face_encoding(img_name):
 
 
 if __name__ == '__main__':
-
     group_photo_name = "mse.jpg"
-
     simFaceTopN = get_sim_face("../../static/picture/wangLei.jpg", get_face_encoding(group_photo_name))  # 寻找相似脸
 
     arr_img = face_recognition.load_image_file(group_photo_name)

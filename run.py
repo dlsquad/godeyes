@@ -13,7 +13,6 @@ from sanic import Sanic
 from aiofiles import os as async_os
 from sanic.response import json, file_stream
 
-from src.utils import
 from src.handler.user import user
 from src.handler.picture import picture
 
@@ -59,6 +58,30 @@ async def post_picture(request):
             }
     })
 
+@app.route("/picture/<code>", methods=["GET"])
+async def get_picture(request, code):
+    """获取原始合照"""
+    if not await picture.check_code(code):
+        return json({
+            "isSuccess": "false",
+            "msg": "code is not exists.",
+            "data": {}
+        })
+    fpath = picture.get_picture(code)
+    if not fname:
+        return json({
+            "isSuccess": "false",
+            "msg": "file is not exists.",
+            "data": {}
+        })
+    return json({
+        "isSuccess": "true",
+        "msg": "",
+        "data": {
+            "url": f"{URL}/{fpath}"
+        }
+    })
+
 @app.route("/code/check", methods=["GET", "POST"])
 async def check_code(request):
     """检验集体照查看码"""
@@ -67,7 +90,7 @@ async def check_code(request):
     code = request.json.get("code", None)
     if not await picture.check_code(code):
         isSuccess = "false"
-        msg = "code is not exists."
+        msg = f"code is not exists."
     return json({
             "msg": msg,
             "isSuccess": isSuccess,
@@ -98,6 +121,33 @@ async def find_user_in_picture(request):
         "data": {
             "url": url,
             "position": pos
+        }
+    })
+
+@app.run("/user/generate", methods=["POST"])
+async def generate_user_in_picture(request):
+    """上传自拍，在集体照中生成出自己"""
+    pic = request.json.get("pic", None)
+    name = request.json.get("name", None)
+    code = request.json.get("code", None)
+    if not (pic and name and code):
+        return json({
+                "isSuccess": "false",
+                "msg": "parameter is not correct.",
+                "data": {}
+        })
+
+    pic = pic.strip()
+    name = name.strip()
+    code = code.strip()
+    await user.post_user(name, pic)
+    fname = await user.generate_user(name, code)
+    url = f"{URL}/static/user/fname"
+    return json({
+        "isSuccess": true,
+        "msg": null,
+        "data": {
+            "url": url,
         }
     })
 

@@ -7,7 +7,6 @@ CREATE TABLE IF NOT EXISTS `user_picture` (
   `picture_id` int(20) unsigned NOT NULL COMMENT '合照ID',
   `pos_x` tinyint(8) NOT NULL COMMENT '从左到右位置, 列',
   `pos_y` tinyint(8) NOT NULL COMMENT '从前到后, 排',
-  `fname` varchar(255) NOT NULL DEFAULT '' COMMENT '识别个人的图片',
   `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `modifid_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
