@@ -9,7 +9,7 @@ import face_recognition
 
 class FaceUtil:
 
-    model_path = "./model/"
+    model_path = "./model"
 
     def __init__(self, target_path: str, group_path: str):
         """
