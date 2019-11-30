@@ -11,8 +11,7 @@ class FaceUtil:
 
     model_path = "./model/"
 
-    def __init__(self, target_path: str, 
-                 group_path: str):
+    def __init__(self, target_path: str, group_path: str):
         """
         Args:
             target_path (PATH): 需要识别的人像路径
