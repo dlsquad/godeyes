@@ -47,7 +47,7 @@ class User(Base):
 
         fname = f"{name}-{code}.jpg"
         fpath = f"{self.static_path}/{fname}"
-        if ret: 
+        if not ret: 
             gname = get_file_in_path(self.static_path, code)
             tname = get_file_in_path(picture,static_path, name)
             gpath = f"{self.static_path}/{gname}"
