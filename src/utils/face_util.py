@@ -71,6 +71,9 @@ class FaceUtil:
         async with aiofiles.open(fpath, "r") as f:
             self.group_location = json.loads(await f.read())
 
+    def _draw_box(self):
+        pass
+
     def _get_similar_faces(self, k: int=1) -> :
         """ 获取最相似的k个人脸位置"""
         face_distance = face_recognition.face_distance(self.target_encoding,

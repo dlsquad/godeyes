@@ -37,7 +37,6 @@ class User(Base):
                 fname (string): 加框图片名
                 position (Tuple(int, int)): 用户所处坐标
         """
-
         sql = f"""SELECT pos_x, pos_y FROM user_picture 
         WHERE user_id=(SELECT id FROM `user` WHERE name='{name}') AND 
         picture_id=(SELECT id FROM `picture` WHERE `code`='{code}');"""
@@ -54,8 +53,17 @@ class User(Base):
             gpath = f"{self.static_path}/{gname}"
             tname = f"{picture.static_path}/{tname}"
             ret = await FaceUtil(tpath, gpath)(fpath)
+            await self._insert_user_picture(name, code, *ret)
 
         return fpath.strip("."), ret
+
+    async def _insert_user_picture(self, name: str, code: str, 
+                                   pos_x: int, pos_y: int):
+        sql = f""""""
+        async with self, self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql)
+                await conn.commit()
 
     async def generate_user(self, name, code):
         # TODO: 实现无中生有
