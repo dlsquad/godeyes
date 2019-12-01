@@ -16,7 +16,7 @@ class Base:
         return cls.instance
 
     async def __aenter__(self):
-        logging.info(f"{self.__class__.__name__} acquire connect.")
+        logger.info(f"{self.__class__.__name__} acquire connect.")
         if self.pool is None:
             self.pool = await aiomysql.create_pool(
                 host='127.0.0.1', port=3306, user='root', 
@@ -24,4 +24,4 @@ class Base:
             logging.info(f"{self.__class__.__name__} create connect.")
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        logging.info(f"{self.__class__.__name__} release connect.")
+        logger.info(f"{self.__class__.__name__} release connect.")
