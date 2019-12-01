@@ -99,6 +99,14 @@ def gnrt_know_encodings(image, ori_img):
     return per_face_location, known_encodings
 
 
+def gen_model_files(gpath):
+    arr_img = face_recognition.load_image_file(gpath)
+    # 人脸位置
+    ori_face_locations = face_recognition.face_locations(arr_img)
+    ori_face_locations = [(left, top, right, bottom, 0) for top, right, bottom, left in ori_face_locations]
+    write_dict_2_model(ori_face_locations, gpath)
+    return ori_face_locations
+
 def get_face_locations(img_name):
     """
     若该图片人脸位置已经存在，则直接返回。否则重新计算
@@ -107,11 +115,7 @@ def get_face_locations(img_name):
     """
     model_name = '{}_face_locations.model'.format(img_name.split('.')[0])
     if not os.path.exists(model_name):
-        arr_img = face_recognition.load_image_file(img_name)
-        # 人脸位置
-        ori_face_locations = face_recognition.face_locations(arr_img)
-        ori_face_locations = [(left, top, right, bottom, 0) for top, right, bottom, left in ori_face_locations]
-        write_dict_2_model(ori_face_locations, model_name)
+        ori_face_locations = gen_model_files(model_name)
     else:
         ori_face_locations = read_dict_model(model_name)
     return ori_face_locations

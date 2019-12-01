@@ -45,6 +45,12 @@ class FaceUtil:
             position x: 用户所在排
             position y: 用户所在列
         """
+        # TODO async ?
+        boxes = BBoxesTool(face_recognition.get_face_location(self.gimg))
+        topN = get_sim_face(self.timg, get_face_encoding(self.gimp))
+        loc = boxes.get_boxi_loc(topN[0])
+        print(loc[0], loc[1]) # raw, col
+
         async with self, aiofiles.open(fpath, "wb") as f:
             pass
 
