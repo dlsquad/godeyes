@@ -13,6 +13,6 @@ CREATE TABLE IF NOT EXISTS `user_picture` (
   foreign key(user_id) references user(id) ON UPDATE CASCADE ON DELETE CASCADE,
   foreign key(picture_id) references picture(id) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-COMMENT='用户表'
+COMMENT='合照位置表'
 ;
 

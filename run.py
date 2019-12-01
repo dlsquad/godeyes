@@ -10,11 +10,14 @@ import logging
 import logging.config
 
 from sanic import Sanic
-from aiofiles import os as async_os
+from sanic_openapi import doc
+from sanic.blueprints import Blueprint
 from sanic.response import json, file_stream
+from sanic_openapi import swagger_blueprint
 
 from src.handler.user import user
 from src.handler.picture import picture
+from src.utils.data import Response, FormResponse
 
 CURRENT_WORK_DIR = os.path.dirname(os.path.abspath(__file__))
 logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf"))
@@ -24,10 +27,14 @@ HOST = "localhost"
 URL = "http://localhost:8080"
 
 app = Sanic("faceplus")
+app.blueprint(swagger_blueprint)
+
 app.static('/static', './static')
 logger = logging.getLogger("web")
 
 @app.route("/", methods=["GET"])
+@doc.summary("欢迎使用faceplus系统")
+@doc.produces(Response)
 async def index(request):
     return json({
         "isSuccess": "true",
@@ -38,6 +45,9 @@ async def index(request):
     })
 
 @app.route("/picture/post", methods=["POST"])
+@doc.summary("上传集体照接口")
+@doc.description("通过post上传json对象，其中pic字段对应图片base64的编码")
+@doc.produces(Response)
 async def post_picture(request):
     """上传集体照,并返回集体照的查看码。"""
     data = request.json.get("pic", None)
@@ -58,7 +68,9 @@ async def post_picture(request):
             }
     })
 
-@app.route("/picture/<code>", methods=["GET"])
+@app.route("/picture/<code:str>", methods=["GET"])
+@doc.summary("通过code获取集体照")
+@doc.produces(Response)
 async def get_picture(request, code):
     """获取原始合照"""
     if not await picture.check_code(code):
@@ -82,21 +94,27 @@ async def get_picture(request, code):
         }
     })
 
-@app.route("/code/check", methods=["GET", "POST"])
-async def check_code(request):
+@app.route("/code/<code:int>", methods=["GET"])
+@doc.summary("检测code码是否存在")
+@doc.produces(Response)
+async def check_code(request, code: str):
     """检验集体照查看码"""
     msg = ""
     isSuccess = "true"
-    code = request.json.get("code", None)
+    code = code.strip()
     if not await picture.check_code(code):
         isSuccess = "false"
         msg = f"code is not exists."
     return json({
-            "msg": msg,
-            "isSuccess": isSuccess,
+        "msg": msg,
+        "isSuccess": isSuccess,
+        "data": {"code": code}
     })
 
 @app.route("/user/find", methods=["POST"])
+@doc.summary("若用户在合照中, 则在合照中找到用户")
+@doc.description("入参为pic,code,name；返回url,position")
+@doc.produces(Response)
 async def find_user_in_picture(request):
     """上传自拍，并在合照中识别自己"""
     pic = request.json.get("pic", None)
@@ -132,6 +150,9 @@ async def find_user_in_picture(request):
     })
 
 @app.route("/user/generate", methods=["POST"])
+@doc.summary("若用户不再合照中，则在在合照中生成用户")
+@doc.description("入参为pic,code,name；返回url")
+@doc.produces(Response)
 async def generate_user_in_picture(request):
     """上传自拍，在集体照中生成出自己"""
     pic = request.json.get("pic", None)
@@ -156,6 +177,25 @@ async def generate_user_in_picture(request):
         "data": {
             "url": url,
         }
+    })
+
+@app.route("/picture/export/<code:int>", methods=["GET"])
+@doc.summary("导出code对应合照的人名表单")
+@doc.description("入参为pic,code,name；返回url")
+@doc.produces(FormResponse)
+async def export_names_in_picture(request, code: str):
+    """导出合照中的名单表"""
+    if not await picture.check_code(code):
+        return json({
+            "isSuccess": "false",
+            "msg": "code is not exists.",
+            "data": {}
+        })
+    data = await picture.export_names(code)
+    return json({
+        "isSuccess": "true",
+        "msg": "",
+        "data": data
     })
 
 
