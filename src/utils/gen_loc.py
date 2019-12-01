@@ -171,7 +171,7 @@ if __name__ == "__main__":
     import face_recognition
     fpath = "../../static/picture/123456.jpg"
     face_encodings = face_recognition.load_image_file(fpath)
-    face_locations = face_recognition.get_face_locations(face_encodings)
+    face_locations = face_recognition.face_location(face_encodings)
 
     btools = BBoxesTool(face_locations)
     btools = BBoxesTool(boxes)

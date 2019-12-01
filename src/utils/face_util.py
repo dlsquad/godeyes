@@ -27,15 +27,17 @@ class FaceUtil:
         code = self.group_path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
         encoding_path = f"{self.model_path}/{code}-encode.model"
         location_path = f"{self.model_path}/{code}-location.model"
-        if os.path.exists(encoding_path):
-            await self._load_encoding(encoding_path)
-        else:
-            await self._save_encoding(encoding_path)
         if os.path.exists(location_path):
             await self._load_location(location_path)
         else:
             await self._save_location(location_path)
-        self.group_encoding = face_recognition.face_encodings(self.timg)
+
+        if os.path.exists(encoding_path):
+            await self._load_encoding(encoding_path)
+        else:
+            await self._save_encoding(encoding_path)
+
+        self.target_encoding = face_recognition.face_encodings(self.timg)[0]
 
     async def __call__(self, fpath) -> (int, int):
         """ 在合照中框出目标用户，并保存成文件到指定路径。
@@ -45,19 +47,20 @@ class FaceUtil:
             position x: 用户所在排
             position y: 用户所在列
         """
-        # TODO async ?
-        boxes = BBoxesTool(face_recognition.get_face_location(self.gimg))
-        topN = get_sim_face(self.timg, get_face_encoding(self.gimp))
-        loc = boxes.get_boxi_loc(topN[0])
-        print(loc[0], loc[1]) # raw, col
+        async with self:
+            index = self._get_similar_faces()[0]
+            location = self.group_location[index]
+            position = self.btool.get_boxi_loc(index)
+            await self._draw_box_in_picture(fpath)
 
-        async with self, aiofiles.open(fpath, "wb") as f:
-            pass
+    async def _draw_box_in_picture(self, fpath):
+        async with aiofiles.open(fpath, "wb") as f:
 
     async def _save_encoding(self, fpath: str):
         """获取人脸编码，保存到文件"""
         async with aiofiles.open(fpath, "w") as f:
-            self.group_encoding = face_recognition.face_encodings(self.gimg)
+            self.group_encoding = face_recognition.face_encodings(self.gimg, 
+                                                            self.group_location)
             await f.write(json.dumps([e.tolist() for e in self.group_encoding]))
 
     async def _load_encoding(self, fpath: str):
@@ -69,18 +72,17 @@ class FaceUtil:
         """获取人脸位置并保存到文件"""
         async with aiofiles.open(fpath, "w") as f:
             self.group_location = face_recognition.face_locations(self.gimg)
+            self.btool = BBoxesTool([list(l)+[0] for l in self.group_location])
             await f.write(json.dumps(self.group_location))
 
     async def _load_location(self, fpath: str):
         """从文件中载入人脸位置"""
         async with aiofiles.open(fpath, "r") as f:
             self.group_location = json.loads(await f.read())
-
-    def _draw_box(self):
-        pass
+            self.btool = BBoxesTool([list(l)+[0] for l in self.group_location])
 
     def _get_similar_faces(self, k: int=1):
         """ 获取最相似的k个人脸位置"""
         face_distance = face_recognition.face_distance(self.target_encoding,
                                                        self.group_encoding)
-        # return [f[0] for f in sorted(face_distance, key=lambda x:x[1])[0:k]]
+        return [for i, _ in sorted(enumerate(face_distances, lambda x: x[1]))[0:k]]
