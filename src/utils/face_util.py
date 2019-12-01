@@ -10,6 +10,8 @@ import face_recognition
 from .gen_loc import BBoxesTool
 
 
+BTOOL_DICT = {}
+
 logger = logging.getLogger("web")
 
 
@@ -45,10 +47,16 @@ class FaceUtil:
         else:
             await self._save_encoding(encoding_path)
 
+        if code in BTOOL_DICT:
+            self.btool = BTOOL_DICT.get(code)
+        else:
+            self.btool = BBoxesTool([list(l)+[0] for l in self.group_location])
+            BTOOL_DICT.update({code: self.btool})
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
 
-    async def __call__(self, fpath) -> (int, int):
+    async def __call__(self, fpath: str) -> (int, int):
         """ 在合照中框出目标用户，并保存成文件到指定路径。
         Args:
             fpath (PATH): 文件路径
@@ -57,7 +65,7 @@ class FaceUtil:
             position y: 用户所在列
         """
         async with self:
-            indexes = self._get_similar_faces_indexs()
+            indexes = self._get_similar_face_indexes()
             if not indexes:
                 return None
             location = self.group_location[indexes[0]]
@@ -87,19 +95,18 @@ class FaceUtil:
         """获取人脸位置并保存到文件"""
         async with aiofiles.open(fpath, "w") as f:
             self.group_location = face_recognition.face_locations(self.gimg)
-            self.btool = BBoxesTool([list(l)+[0] for l in self.group_location])
             await f.write(json.dumps(self.group_location))
 
     async def _load_location(self, fpath: str):
         """从文件中载入人脸位置"""
         async with aiofiles.open(fpath, "r") as f:
             self.group_location = json.loads(await f.read())
-            self.btool = BBoxesTool([list(l)+[0] for l in self.group_location])
 
-    def _get_similar_faces_indexs(self, k: int=1) -> typing.List[int]:
+    def _get_similar_face_indexes(self, k: int=1) -> typing.List[int]:
         """ 获取最相似的k个人脸位置"""
         target_encoding = face_recognition.face_encodings(self.timg)
         if not target_encoding:
             return []
         distances = face_recognition.face_distance(target_encoding[0], self.group_encoding)
         return [i for i, _ in sorted(enumerate(distances), key=lambda x: x[1])[0:k]]
+
