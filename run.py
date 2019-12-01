@@ -47,6 +47,7 @@ async def index(request):
 @app.route("/picture/post", methods=["POST"])
 @doc.summary("上传集体照接口")
 @doc.description("通过post上传json对象，其中pic字段对应图片base64的编码")
+@doc.consumes({"pic": str}, location="body")
 @doc.produces(Response)
 async def post_picture(request):
     """上传集体照,并返回集体照的查看码。"""
@@ -94,7 +95,7 @@ async def get_picture(request, code):
         }
     })
 
-@app.route("/code/<code:int>", methods=["GET"])
+@app.route("/code/<code:str>", methods=["GET"])
 @doc.summary("检测code码是否存在")
 @doc.produces(Response)
 async def check_code(request, code: str):
@@ -114,6 +115,7 @@ async def check_code(request, code: str):
 @app.route("/user/find", methods=["POST"])
 @doc.summary("若用户在合照中, 则在合照中找到用户")
 @doc.description("入参为pic,code,name；返回url,position")
+@doc.consumes({"pic": str,"code": str,"name": str}, location="body")
 @doc.produces(Response)
 async def find_user_in_picture(request):
     """上传自拍，并在合照中识别自己"""
@@ -152,6 +154,7 @@ async def find_user_in_picture(request):
 @app.route("/user/generate", methods=["POST"])
 @doc.summary("若用户不再合照中，则在在合照中生成用户")
 @doc.description("入参为pic,code,name；返回url")
+@doc.consumes({"pic": str,"code": str,"name": str}, location="body")
 @doc.produces(Response)
 async def generate_user_in_picture(request):
     """上传自拍，在集体照中生成出自己"""
@@ -181,7 +184,6 @@ async def generate_user_in_picture(request):
 
 @app.route("/picture/export/<code:int>", methods=["GET"])
 @doc.summary("导出code对应合照的人名表单")
-@doc.description("入参为pic,code,name；返回url")
 @doc.produces(FormResponse)
 async def export_names_in_picture(request, code: str):
     """导出合照中的名单表"""

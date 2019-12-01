@@ -31,9 +31,9 @@ class Picture(Base):
         path = f"{self.static_path}/{code}.{image_suf}"
         async with aiofiles.open(path, "wb") as w:
             await w.write(image_bytes)
-            # TODO await ? return all raws & cols
-            boxes = BBoxesTool(face_recognition.get_face_locations(path))
-            print(boxes.get_boxes_info())
+            # # TODO await ? return all raws & cols
+            # boxes = BBoxesTool(face_recognition.get_face_locations(path))
+            # print(boxes.get_boxes_info())
         return code
 
     def get_picture(self, code: str) -> str:

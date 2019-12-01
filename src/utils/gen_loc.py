@@ -7,11 +7,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 
-# testfile = "/Users/fanbeishuang/fbs/workspace/py/PycharmProjects/godeyes/boxes_data_test.csv"
-testfile = "/home/fbs/fbs/workspace/PycharmProjects/face_detection/mxnet_mtcnn_face_detection/boxes_data_test.csv"
-
 
 class BBoxesTool:
+
     _columns = ['x1', 'y1', 'x2', 'y2', 'score']
     _columns_rc = ['raw', 'col']
     _MaxPeoplePerTask = 120
@@ -66,7 +64,6 @@ class BBoxesTool:
         outliers = [val for val in outliers if val in list_pridict_low]
         # print(outliers)
         self.boxes = self.boxes.drop(outliers).drop(columns=['area'], axis=1)
-        return
 
     def _gen_loc_parts(self, boxes):
         sorted_y1 = boxes.sort_values(by=['y1'], ascending=False)
@@ -170,18 +167,15 @@ class BBoxesTool:
         return self.boxes.take(self.test_boxes).values
 
 
-def gen_loc_of_test():
-    boxes = pd.read_csv(testfile, header=0)
-    # print(boxes.describe())
+if __name__ == "__main__":
+    import face_recognition
+    fpath = "../../static/picture/123456.jpg"
+    face_encodings = face_recognition.load_image_file(fpath)
+    face_locations = face_recognition.get_face_locations(face_encodings)
+
+    btools = BBoxesTool(face_locations)
     btools = BBoxesTool(boxes)
-    print("test boxes")
-    # print(btools.get_boxes())
     print(btools.get_boxes_info())
     print(btools.get_boxi_loc(6))
     print(btools.get_boxi_loc(66))
 
-
-# pd.set_option('display.max_rows', None)
-# pd.set_option('display.max_columns', None)
-# pd.set_option('display.max_colwidth', 500)
-gen_loc_of_test()
