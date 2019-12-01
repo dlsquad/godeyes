@@ -61,24 +61,24 @@ class User(Base):
                     picture_id=picture_id
                 )
                 await cur.execute(sql_3)
-                ret = await cur.fetchone()
+                pos = await cur.fetchone()
 
         fname = f"{name}-{code}.jpg"
         fpath = f"{self.static_path}/{fname}"
-        if not ret: 
+        if not pos: 
             tname = get_file_in_path(self.static_path, name)
             gname = get_file_in_path(picture.static_path, code)
             gpath = f"{picture.static_path}/{gname}"
             tpath = f"{self.static_path}/{tname}"
-            ret = await FaceUtil(tpath, gpath)(fpath)
-            await self._insert_user_picture(user_id, picture_id, *ret)
+            pos = await FaceUtil(tpath, gpath)(fpath)
+            await self._insert_user_picture(user_id, picture_id, *pos)
 
-        return fname, ret
+        return fname, pos
 
     async def _insert_user_picture(self, user_id: int, picture_id: int, 
                                    pos_x: int, pos_y: int):
         sql = f"""INSERT INTO user_picture(user_id, picture_id,
-        pos_x, pos_y) VALUES({user_id}, {picture_id}, pos_x, pos_y);"""
+        pos_x, pos_y) VALUES({user_id}, {picture_id}, {pos_x}, {pos_y});"""
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(sql)
