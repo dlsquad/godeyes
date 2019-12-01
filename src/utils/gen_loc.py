@@ -9,11 +9,16 @@ from collections import Counter
 
 class BBoxesTool:
 
-    _columns = ['x1', 'y1', 'x2', 'y2', 'score']
+    # _columns = ['x1', 'y1', 'x2', 'y2', 'score']
+    _columns = ['y1', 'x2', 'y2', 'x1', 'score']
     _columns_rc = ['raw', 'col']
     _MaxPeoplePerTask = 120
+    test_boxes = {}
 
     def __init__(self, boxes, outlier_check=False):
+        # boxes = [(left, top, right, bottom, 0) for top, right, bottom, left in boxes]
+        if len(boxes[0]) == 4:
+            boxes = [list(l)+[0] for l in boxes]
         self.boxes = pd.DataFrame(boxes, columns=self._columns)
         if outlier_check:
             self._filter_outlier()
@@ -87,16 +92,15 @@ class BBoxesTool:
                 # print("rd_index:", rd_index, ",x1:", x1, ",x2:", x2, ",left_x:", left_x, ",right_x:", right_x)
                 if (x1 <= left_x <= x2) or (left_x <= x1 and right_x >= x2) or (x1 <= right_x <= x2):
                     new_raw = True
-                    # if raw_count == 4:
-                    #     self.test_boxes = raw_loc[raw_count]
-                    #     return raw_loc
+                    # if raw_count == 3:
+                    # self.test_boxes.append(raw_loc[raw_count])
                     raw_count += 1
                     raw_loc[raw_count] = [index]
                     break
             if not new_raw:
                 raw_loc[raw_count].append(index)
 
-        self.test_boxes = raw_loc[raw_count]
+        # self.test_boxes = raw_loc
         return raw_loc
 
     def _raw_loc_to_box_info(self, raw_loc):
@@ -159,21 +163,25 @@ class BBoxesTool:
                 res[raw].extend(indexes)
         return res
 
-    def get_test_boxes(self):
+    def get_test_boxes(self, indexes):
         # indexes = []
         # for index,_ in self.test_boxes.iterrows():
         #     indexes.append(index)
-        return self.boxes.take(self.test_boxes).values
+        return self.boxes.take(indexes).values
 
 
 if __name__ == "__main__":
     import face_recognition
-    fpath = "../../static/picture/123456.jpg"
-    face_encodings = face_recognition.load_image_file(fpath)
-    face_locations = face_recognition.face_location(face_encodings)
+    fpath = "/Users/fanbeishuang/fbs/workspace/py/PycharmProjects/godeyes/2019MSEtest.jpeg"
+    # 显示所有列
+    pd.set_option('display.max_columns', None)
+    # 显示所有行
+    pd.set_option('display.max_rows', 50)
 
+    face_encodings = face_recognition.load_image_file(fpath)
+    face_locations = face_recognition.face_locations(face_encodings)
+    # face_locations = [(left, top, right, bottom, 0) for top, right, bottom, left in face_locations]
     btools = BBoxesTool(face_locations)
-    btools = BBoxesTool(boxes)
     print(btools.get_boxes_info())
     print(btools.get_boxi_loc(6))
     print(btools.get_boxi_loc(66))
