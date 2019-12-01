@@ -34,7 +34,7 @@ class Picture(Base):
 
     def get_picture(self, code: str) -> str:
         fname = get_file_in_path(self.static_path, code)
-        return f"{self.static_path.strip('.'}/{fname}"
+        return f"{self.static_path.strip('.')}/{fname}"
 
     async def _insert_picture(self) -> str:
         sql = "INSERT INTO picture(code) values('{code}');"

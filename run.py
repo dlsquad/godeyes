@@ -33,7 +33,7 @@ async def index(request):
         "isSuccess": "true",
         "msg": "welcome to faceplus system!",
         "data": {
-            "url": "xxxx.com/xx.png"
+            "url": f"{URL}/static/picture/123456.jpg"
         }
     })
 
@@ -68,7 +68,7 @@ async def get_picture(request, code):
             "data": {}
         })
     fpath = picture.get_picture(code)
-    if not fname:
+    if not fpath:
         return json({
             "isSuccess": "false",
             "msg": "file is not exists.",
@@ -78,7 +78,7 @@ async def get_picture(request, code):
         "isSuccess": "true",
         "msg": "",
         "data": {
-            "url": f"{URL}/{fpath}"
+            "url": URL+fpath
         }
     })
 
@@ -114,17 +114,24 @@ async def find_user_in_picture(request):
     code = code.strip()
     await user.post_user(name, pic)
     fname, pos = await user.find_user(name, code)
-    url = f"{URL}/static/user/fname"
+    if not pos:
+        return json({
+            "isSuccess": "false",
+            "msg": fname,
+            "data": {}
+        })
+    url = f"{URL}/static/user/{fname}"
+    pos = f"第{pos[0]}排 第{pos[1]}位"
     return json({
-        "isSuccess": true,
-        "msg": null,
+        "isSuccess": "true",
+        "msg": "user is find in picture.",
         "data": {
             "url": url,
             "position": pos
         }
     })
 
-@app.run("/user/generate", methods=["POST"])
+@app.route("/user/generate", methods=["POST"])
 async def generate_user_in_picture(request):
     """上传自拍，在集体照中生成出自己"""
     pic = request.json.get("pic", None)
