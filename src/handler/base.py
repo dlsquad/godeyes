@@ -12,7 +12,7 @@ class Base:
     def __new__(cls, *args, **kwargs):
         if cls.instance is None:
             cls.instance = super().__new__(cls, *args, **kwargs)
-            logging.info(f"create {cls.__name__} singleton")
+            logger.info(f"create {cls.__name__} singleton")
         return cls.instance
 
     async def __aenter__(self):
@@ -21,7 +21,7 @@ class Base:
             self.pool = await aiomysql.create_pool(
                 host='127.0.0.1', port=3306, user='root', 
                 password='DLsquad5@fudan',db='faceplus')
-            logging.info(f"{self.__class__.__name__} create connect.")
+            logger.info(f"{self.__class__.__name__} create connect.")
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         logger.info(f"{self.__class__.__name__} release connect.")
