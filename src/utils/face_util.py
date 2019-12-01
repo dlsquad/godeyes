@@ -51,10 +51,10 @@ class FaceUtil:
             index = self._get_similar_faces()[0]
             location = self.group_location[index]
             position = self.btool.get_boxi_loc(index)
-            await self._draw_box_in_picture(fpath)
-
-    async def _draw_box_in_picture(self, fpath):
-        async with aiofiles.open(fpath, "wb") as f:
+            top, right, bottom, left = location
+            draw_image = self.gimg.copy()
+            cv2.rectangle(draw_image, (left, top), (right, bottom))
+            cv2.imwrite(fpath, draw_image)
 
     async def _save_encoding(self, fpath: str):
         """获取人脸编码，保存到文件"""
