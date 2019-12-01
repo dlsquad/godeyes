@@ -69,10 +69,10 @@ async def post_picture(request):
             }
     })
 
-@app.route("/picture/<code:str>", methods=["GET"])
+@app.route("/picture/<code>", methods=["GET"])
 @doc.summary("通过code获取集体照")
 @doc.produces(Response)
-async def get_picture(request, code):
+async def get_picture(request, code: str):
     """获取原始合照"""
     if not await picture.check_code(code):
         return json({
@@ -95,7 +95,7 @@ async def get_picture(request, code):
         }
     })
 
-@app.route("/code/<code:str>", methods=["GET"])
+@app.route("/code/<code>", methods=["GET"])
 @doc.summary("检测code码是否存在")
 @doc.produces(Response)
 async def check_code(request, code: str):
@@ -182,7 +182,7 @@ async def generate_user_in_picture(request):
         }
     })
 
-@app.route("/picture/export/<code:int>", methods=["GET"])
+@app.route("/picture/export/<code>", methods=["GET"])
 @doc.summary("导出code对应合照的人名表单")
 @doc.produces(FormResponse)
 async def export_names_in_picture(request, code: str):
