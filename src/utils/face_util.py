@@ -45,7 +45,6 @@ class FaceUtil:
         else:
             await self._save_encoding(encoding_path)
 
-
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         pass
 
