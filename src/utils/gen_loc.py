@@ -16,9 +16,10 @@ class BBoxesTool:
     _columns_rc = ['raw', 'col']
     _MaxPeoplePerTask = 120
 
-    def __init__(self, boxes):
+    def __init__(self, boxes, outlier_check=False):
         self.boxes = pd.DataFrame(boxes, columns=self._columns)
-        self._filter_outlier()
+        if outlier_check:
+            self._filter_outlier()
         self._to_location()
 
     def get_boxes(self):
