@@ -2,11 +2,15 @@ import os
 import cv2
 import json
 import typing
+import logging
 
 import aiofiles
 import face_recognition
 
 from .gen_loc import BBoxesTool
+
+
+logger = logging.getLogger("web")
 
 
 class FaceUtil:
@@ -19,6 +23,8 @@ class FaceUtil:
             target_path (PATH): 需要识别的人像路径
             group_path (PATH): 合照路径
         """
+        self.target_path = target_path
+        self.group_path = group_path
         self.timg = face_recognition.load_image_file(target_path)
         self.gimg = face_recognition.load_image_file(group_path)
 
@@ -39,7 +45,9 @@ class FaceUtil:
         else:
             await self._save_encoding(encoding_path)
 
-        self.target_encoding = face_recognition.face_encodings(self.timg)[0]
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        pass
 
     async def __call__(self, fpath) -> (int, int):
         """ 在合照中框出目标用户，并保存成文件到指定路径。
@@ -50,15 +58,18 @@ class FaceUtil:
             position y: 用户所在列
         """
         async with self:
-            index = self._get_similar_faces()[0]
-            location = self.group_location[index]
-            position = self.btool.get_boxi_loc(index)
+            indexes = self._get_similar_faces_indexs()
+            if not indexes:
+                return None
+            location = self.group_location[indexes[0]]
             self._draw_box_and_save(fpath, location)
+            return self.btool.get_boxi_loc(indexes[0])
 
-    def _draw_box_and_save(fpath: str, location: typing.Tuple):
+    def _draw_box_and_save(self, fpath: str, location: typing.Tuple[int]):
         draw_image = self.gimg.copy()
         top, right, bottom, left = location
-        draw_image = cv2.rectangle(self.gimg, (left, top), (right, bottom), (255, 255, 0), 2))
+        draw_image = cv2.rectangle(draw_image, 
+            (left, top), (right, bottom), (255, 255, 0), 2)
         cv2.imwrite(fpath, draw_image)
 
     async def _save_encoding(self, fpath: str):
@@ -86,8 +97,10 @@ class FaceUtil:
             self.group_location = json.loads(await f.read())
             self.btool = BBoxesTool([list(l)+[0] for l in self.group_location])
 
-    def _get_similar_faces(self, k: int=1):
+    def _get_similar_faces_indexs(self, k: int=1) -> typing.List[int]:
         """ 获取最相似的k个人脸位置"""
-        face_distance = face_recognition.face_distance(self.target_encoding,
-                                                       self.group_encoding)
-        return [for i, _ in sorted(enumerate(face_distances, lambda x: x[1]))[0:k]]
+        target_encoding = face_recognition.face_encodings(self.timg)
+        if not target_encoding:
+            return []
+        distances = face_recognition.face_distance(target_encoding[0], self.group_encoding)
+        return [i for i, _ in sorted(enumerate(distances), key=lambda x: x[1])[0:k]]
