@@ -6,6 +6,8 @@ import typing
 import aiofiles
 import face_recognition
 
+from .gen_loc import BBoxesTool
+
 
 class FaceUtil:
 
@@ -51,10 +53,13 @@ class FaceUtil:
             index = self._get_similar_faces()[0]
             location = self.group_location[index]
             position = self.btool.get_boxi_loc(index)
-            top, right, bottom, left = location
-            draw_image = self.gimg.copy()
-            cv2.rectangle(draw_image, (left, top), (right, bottom))
-            cv2.imwrite(fpath, draw_image)
+            self._draw_box_and_save(fpath, location)
+
+    def _draw_box_and_save(fpath: str, location: typing.Tuple):
+        draw_image = self.gimg.copy()
+        top, right, bottom, left = location
+        draw_image = cv2.rectangle(self.gimg, (left, top), (right, bottom), (255, 255, 0), 2))
+        cv2.imwrite(fpath, draw_image)
 
     async def _save_encoding(self, fpath: str):
         """获取人脸编码，保存到文件"""
