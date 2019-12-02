@@ -95,14 +95,12 @@ class FaceUtil:
         """获取人脸位置并保存到文件"""
         async with aiofiles.open(fpath, "w") as f:
             self.group_location = face_recognition.face_locations(self.gimg)
-            self.btool = BBoxesTool(self.group_location)
             await f.write(json.dumps(self.group_location))
 
     async def _load_location(self, fpath: str):
         """从文件中载入人脸位置"""
         async with aiofiles.open(fpath, "r") as f:
             self.group_location = json.loads(await f.read())
-            self.btool = BBoxesTool(self.group_location)
 
     def _get_similar_face_indexes(self, k: int=1) -> typing.List[int]:
         """ 获取最相似的k个人脸位置"""
