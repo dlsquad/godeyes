@@ -173,7 +173,7 @@ async def generate_user_in_picture(request):
     code = code.strip()
     await user.post_user(name, pic)
     fname = await user.generate_user(name, code)
-    url = f"{URL}/static/user/fname"
+    url = f"{URL}/static/user/{fname}"
     return json({
         "isSuccess": true,
         "msg": null,
@@ -182,7 +182,7 @@ async def generate_user_in_picture(request):
         }
     })
 
-@app.route("/picture/export/<code>", methods=["GET"])
+@app.route("/table/<code>", methods=["GET"])
 @doc.summary("导出code对应合照的人名表单")
 @doc.produces(FormResponse)
 async def export_names_in_picture(request, code: str):
@@ -193,7 +193,7 @@ async def export_names_in_picture(request, code: str):
             "msg": "code is not exists.",
             "data": {}
         })
-    data = await picture.export_names(code)
+    data = await picture.export_table(code)
     return json({
         "isSuccess": "true",
         "msg": "",

@@ -1,3 +1,4 @@
+import typing
 import base64
 import logging
 import asyncio
@@ -31,9 +32,6 @@ class Picture(Base):
         path = f"{self.static_path}/{code}.{image_suf}"
         async with aiofiles.open(path, "wb") as w:
             await w.write(image_bytes)
-            # # TODO await ? return all raws & cols
-            # boxes = BBoxesTool(face_recognition.get_face_locations(path))
-            # print(boxes.get_boxes_info())
         return code
 
     def get_picture(self, code: str) -> str:
@@ -56,6 +54,17 @@ class Picture(Base):
                         continue
                     logger.info(f"{code} have inserted.")
                     return code
+
+    async def export_table(self, code: str):
+        sql = f"""SELECT u.name,t.pos_x,t.pos_y FROM (SELECT user_id, pos_x, pos_y 
+        FROM user_picture WHERE picture_id=(SELECT id FROM picture WHERE code='{code}')) 
+        t JOIN user u ON u.id=t.user_id"""
+        async with self, self.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql)
+                data = await cur.fetchall()
+                return data
+
 
 
 picture = Picture()
