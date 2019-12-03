@@ -1,4 +1,5 @@
 import base64
+import random
 import logging
 import asyncio
 import aiofiles
@@ -31,9 +32,9 @@ class Picture(Base):
         path = f"{self.static_path}/{code}.{image_suf}"
         async with aiofiles.open(path, "wb") as w:
             await w.write(image_bytes)
-            # # TODO await ? return all raws & cols
-            # boxes = BBoxesTool(face_recognition.get_face_locations(path))
-            # print(boxes.get_boxes_info())
+
+        channels = await self.redis.pubsub_channels('channel:*')
+        await self.redis.publish(random.choice(channels), path)
         return code
 
     def get_picture(self, code: str) -> str:
