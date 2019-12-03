@@ -9,6 +9,7 @@ import aiofiles
 import aiomysql
 import logging.config
 import face_recognition
+from datetime import datetime
 
 from src.utils.face_util import FaceUtil
 from concurrent.futures import ProcessPoolExecutor
@@ -49,7 +50,9 @@ async def worker(loop, executor, ch):
     channel = (await conn.subscribe(f"channel:{ch}"))[0]
     while await channel.wait_message():
         fpath = await channel.get(encoding="utf-8")
+        logger.info(f"start get_model(fpath): {fpath}")
         data = await loop.run_in_executor(executor, get_model, fpath)
+        logger.info(f"end get_model(fpath): {fpath}")
         if not data:
             logger.error(f"picture {fpath} recognize error.")
             continue

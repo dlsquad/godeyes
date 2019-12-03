@@ -24,7 +24,7 @@ logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf")
 
 PORT = 8080
 HOST = "localhost"
-URL = "http://localhost:8080"
+URL = "http://collhome.com:8888"
 
 app = Sanic("faceplus")
 app.blueprint(swagger_blueprint)
