@@ -6,13 +6,13 @@
 *.swp
 .idea/*
 .DS_Store
-# *test.*
+*test.*
 
 # log
-# *.log
+*.log
 
 # files
-# static/*
-# log/*
-# main.py
-# model/*
+static/*
+log/*
+main.py
+model/*
