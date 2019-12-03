@@ -202,4 +202,4 @@ async def export_names_in_picture(request, code: str):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, access_log=True, host=HOST, port=PORT, workers=8)
+    app.run(host=HOST, port=PORT, workers=8)
