@@ -19,4 +19,3 @@ def get_file_in_path(path: str, fname: str) -> str:
         if fname == f.rsplit(".", 1)[0]:
             return f
     return ""
-

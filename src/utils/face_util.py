@@ -91,3 +91,19 @@ class FaceUtil:
         distances = face_recognition.face_distance(target_encoding[0], self.group_encoding)
         return [i for i, _ in sorted(enumerate(distances), key=lambda x: x[1])[0:k]]
 
+    @classmethod
+    async def get_table_info(cls, code: str) -> typing.Dict[int, int]:
+        if code in BTOOL_DICT:
+            return BTOOL_DICT.get(code).get_boxes_info().to_dict()
+
+        location_path = f"{cls.model_path}/{code}-location.model"
+        if not (os.path.exists(location_path) and (
+            await async_os.stat(location_path)).st_size > 0):
+            return None
+
+        async with aiofiles.open(location_path, "r") as f:
+            group_location = json.loads(await f.read())
+        btool = BBoxesTool([list(l)+[0] for l in group_location])
+        BTOOL_DICT.update({code: btool})
+        return btool.get_boxes_info().to_dict()
+

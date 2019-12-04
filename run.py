@@ -182,7 +182,7 @@ async def generate_user_in_picture(request):
         }
     })
 
-@app.route("/picture/export/<code>", methods=["GET"])
+@app.route("/table/<code>", methods=["GET"])
 @doc.summary("导出code对应合照的人名表单")
 @doc.produces(FormResponse)
 async def export_names_in_picture(request, code: str):
@@ -193,7 +193,13 @@ async def export_names_in_picture(request, code: str):
             "msg": "code is not exists.",
             "data": {}
         })
-    data = await picture.export_names(code)
+    data = await picture.export_table(code)
+    if isinstance(data, str):
+        return json({
+            "isSuccess": "false",
+            "msg": data,
+            "data": ""
+        })
     return json({
         "isSuccess": "true",
         "msg": "",
