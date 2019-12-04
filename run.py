@@ -173,7 +173,7 @@ async def generate_user_in_picture(request):
     code = code.strip()
     await user.post_user(name, pic)
     fname = await user.generate_user(name, code)
-    url = f"{URL}/static/user/fname"
+    url = f"{URL}/static/user/{fname}"
     return json({
         "isSuccess": true,
         "msg": null,
