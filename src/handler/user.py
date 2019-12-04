@@ -17,7 +17,18 @@ class User(Base):
             async with conn.cursor() as cur:
                 await cur.execute(sql)
                 await conn.commit()
-                return cur.lastrowid
+                if not cur.lastrowid:
+                    return await self._get_user(name)
+                else:
+                    return cur.lastrowid
+
+    async def _get_user(self, name: str) -> int:
+        sql = f"""SELECT id FROM `user` WHERE name='{name}';"""
+        async with self, self.pool.acquire() as conn:
+            async with conn.cursor() as cur:
+                await cur.execute(sql)
+                result = await cur.fetchone()
+                return result[0] if result else 0
 
     async def post_user(self, name: str, pic: str):
         image_str, image_data = pic.split(",", 1)
@@ -72,6 +83,8 @@ class User(Base):
             gpath = f"{picture.static_path}/{gname}"
             tpath = f"{self.static_path}/{tname}"
             pos = await FaceUtil(tpath, gpath)(fpath)
+            if isinstance(pos, str):
+                return pos, None
             await self._insert_user_picture(user_id, picture_id, *pos)
 
         return fname, pos

@@ -24,7 +24,7 @@ logging.config.fileConfig(os.path.join(CURRENT_WORK_DIR, "conf", "logging.conf")
 
 PORT = 8080
 HOST = "localhost"
-URL = "http://localhost:8080"
+URL = "http://collhome.com:8888"
 
 app = Sanic("faceplus")
 app.blueprint(swagger_blueprint)
@@ -194,6 +194,12 @@ async def export_names_in_picture(request, code: str):
             "data": {}
         })
     data = await picture.export_table(code)
+    if isinstance(data, str):
+        return json({
+            "isSuccess": "false",
+            "msg": data,
+            "data": ""
+        })
     return json({
         "isSuccess": "true",
         "msg": "",
@@ -202,4 +208,4 @@ async def export_names_in_picture(request, code: str):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, access_log=True, host=HOST, port=PORT)
+    app.run(host=HOST, port=PORT, workers=8)
