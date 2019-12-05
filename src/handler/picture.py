@@ -22,8 +22,10 @@ class Picture(Base):
         sql = f"SELECT code FROM picture WHERE code='{code}'"
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
+                await conn.commit()
                 await cur.execute(sql)
-                return bool(await cur.fetchone())
+                result = await cur.fetchone()
+                return bool(result)
 
     async def post_picture(self, data: str) -> str:
         image_str, image_data = data.split(",", 1)
@@ -91,8 +93,10 @@ class Picture(Base):
         t JOIN user u ON u.id=t.user_id"""
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
+                await conn.commit()
                 await cur.execute(sql)
-                return await cur.fetchall()
+                user_info = await cur.fetchall()
+                return user_info
 
 
 picture = Picture()
