@@ -19,11 +19,11 @@ class Picture(Base):
     static_path = "./static/picture"
 
     async def check_code(self, code: str) -> bool:
-        sql = f"SELECT code FROM picture WHERE code={code}"
+        sql = f"SELECT code FROM picture WHERE code='{code}'"
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
                 await cur.execute(sql)
-                return bool((await cur.fetchone()))
+                return bool(await cur.fetchone())
 
     async def post_picture(self, data: str) -> str:
         image_str, image_data = data.split(",", 1)
