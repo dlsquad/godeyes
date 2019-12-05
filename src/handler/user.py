@@ -26,6 +26,7 @@ class User(Base):
         sql = f"""SELECT id FROM `user` WHERE name='{name}';"""
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
+                await conn.commit()
                 await cur.execute(sql)
                 result = await cur.fetchone()
                 return result[0] if result else 0
@@ -58,6 +59,7 @@ class User(Base):
         WHERE user_id={user_id} AND picture_id={picture_id};"""
         async with self, self.pool.acquire() as conn:
             async with conn.cursor() as cur:
+                await conn.commit()
                 await cur.execute(sql_1)
                 user_info = await cur.fetchone()
                 if not user_info:
